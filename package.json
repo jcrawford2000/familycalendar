@@ -1,0 +1,30 @@
+{
+  "name": "familycalendar",
+  "version": "1.0.0",
+  "description": "Google Family Calendar",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jcrawford2000/familycalendar.git"
+  },
+  "keywords": [
+    "Calendar",
+    "Family",
+    "Google"
+  ],
+  "author": "Justin Crawford",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/jcrawford2000/familycalendar/issues"
+  },
+  "homepage": "https://github.com/jcrawford2000/familycalendar#readme",
+  "dependencies": {
+    "express": "^4.14.0",
+    "log4js": "^1.1.0",
+    "googleapis":"^19.0.0",
+    "google-auth-library":"^0.10.0"
+  }
+}
