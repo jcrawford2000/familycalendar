@@ -23,8 +23,9 @@
   "homepage": "https://github.com/jcrawford2000/familycalendar#readme",
   "dependencies": {
     "express": "^4.14.0",
+    "google-auth-library": "^0.10.0",
+    "googleapis": "^19.0.0",
     "log4js": "^1.1.0",
-    "googleapis":"^19.0.0",
-    "google-auth-library":"^0.10.0"
+    "pug": "^2.0.0-rc.2"
   }
 }

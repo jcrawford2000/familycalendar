@@ -21,11 +21,20 @@
  */
 const express = require('express');
 const log4js = require('log4js');
+const calendar = require('./calendar');
+const pug = require('pug');
 
 const logger = log4js.getLogger("server");
 const app = express();
 const PORT = process.env.PORT || 8888;
 const router = express.Router();
+var cal;
+
+function setCal(calendar)
+{
+    cal = calendar;
+}
+
 
 /**
  * Server Startup 
@@ -34,12 +43,19 @@ const router = express.Router();
 function start() {
     logger.info("Server Initializing...")
     app.use(log4js.connectLogger(logger, { level: log4js.levels.DEBUG}));
-    router.use(log4js.connectLogger(logger, { level: log4js.levels.DEBUG}));
-    router.get('/', function(req, res){
-        res.json({message:'Hello World!'});
-    });
-    app.use('/api', router);
+    //router.use(log4js.connectLogger(logger, { level: log4js.levels.DEBUG}));
+    //router.get('/', function(req, res){
+    //    res.json({message:'Hello World!'});
+    //});
+    //app.use('/api', router);
+    app.set('views', './views');
+    app.set('view engine','pug');
+    app.get('/', function(req, res)
+        {
+            res.render('index', {title: 'Hey', message: 'Hello there!', list: ['one','two','three']});
+        });
     app.listen(PORT);
+    
     logger.info("Initialization Complete. Server listenting on port:" + PORT);
 }
 

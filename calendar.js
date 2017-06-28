@@ -32,6 +32,7 @@ const path = require('path');
 const SCOPES = ['https://www.googleapis.com/auth/calendar.readonly'];
 const TOKEN_PATH = path.resolve(__dirname, 'calendar-nodejs-quickstart.json');
 const CLIENT_SECRET_PATH = path.resolve(__dirname, 'client_secret.json');
+const CALLIST_DIR = path.resolve(__dirname, 'calendar_list.json');
 const logger = log4js.getLogger('calendar');
 
 /** 
@@ -135,6 +136,26 @@ function storeToken(token) {
   }
   fs.writeFile(TOKEN_PATH, JSON.stringify(token));
   logger.info('Token stored to ' + TOKEN_PATH);
+}
+
+/**
+ * Store Calendar List to disk to be used later
+ * 
+ */
+function storeCalendarList(calList)
+{
+  logger.info("Saving Calendar List");
+  try {
+    fs.mkdirSync(CALLIST_DIR);
+  } catch (err)
+  {
+    if (err.code != 'EEXIST')
+    {
+      throw err;
+    }
+  }
+  fs.writeFile(CALLLIST_PATH, JSON.stringify(callist));
+  logger.info("Calendar List stored to " + CALLLIST_PATH);
 }
 
 /**
