@@ -21,6 +21,7 @@
  */
 const express = require('express');
 const log4js = require('log4js');
+const path = require('path');
 
 const logger = log4js.getLogger("server");
 const app = express();

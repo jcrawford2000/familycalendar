@@ -182,7 +182,7 @@ function listEvents(calendarId, callback) {
   calendar.events.list({
     auth: gauth,
     calendarId: calendarId,
-    
+    timeMin: (new Date()).toISOString(),
     maxResults: 10,
     singleEvents: true,
     orderBy: 'startTime'

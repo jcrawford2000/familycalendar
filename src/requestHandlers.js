@@ -39,10 +39,23 @@ function listEventsByCalendar(req, res) {
                 var event = new Object();
                 event.calId = calendarId;
                 event.id = eventsList[i].id;
-                event.name = eventsList[i].summary;
+                event.title = eventsList[i].summary;
+                event.start = eventsList[i].start.dateTime;
+                event.end = eventsList[i].end.dateTime;
                 eventList.push(event);
             }
-            res.render('eventsList',{title: 'Calendar Events', message: 'Events in Calendar', list: eventList});
+            var calEvents = {
+                theme: true,
+                businessHours: true,
+                editable: true,
+                header: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'month,agendaWeek,agendaDay'
+                }
+            }
+            calEvents.events = eventList;
+            res.render('calendar',{title: 'Calendar Events', message: 'Events in Calendar', list: calEvents});
         }
     })
 }
