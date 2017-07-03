@@ -6,6 +6,6 @@ html
         ul
            each val in list
                 li 
-                   a(href='/list/' + val.id) 
+                   a(href='/event/' + val.calId + '/' + val.id) 
                       = val.name
         

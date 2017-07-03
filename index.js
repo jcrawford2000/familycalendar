@@ -19,14 +19,59 @@
 /*
  * Includes
  */
-const server = require('./server');
-const calendar = require('./calendar');
+const server = require('./src/server');
+const calendar = require('./src/calendar');
+const requestHandlers = require('./src/requestHandlers');
 const log4js = require('log4js');
 
-//Initialize
 var logger = log4js.getLogger('index');
+/**
+ * Handler map sets up the valid paths from the app and the associated handler which is passed to the server
+ */
+var handlerMap = [ {path: '/', handler: requestHandlers.index},
+                   {path: '/list/:id', handler: requestHandlers.listEventsByCalendar},
+                   {path: '/listall', handler: requestHandlers.listAllEvents},
+                   {path: '/event/:calId/:id', handler: requestHandlers.getEvent},
+                   {path: '/calendar', handler: requestHandlers.showCalendar}
+                 ];
+/**
+ * Initialize Calendar Access, start server
+ */
 logger.info("Family Calendar Server Starting");
-server.start();
-calendar.init(function getCalendar(){ 
-    calendar.getCalendarList();
-});
+calendar.init();
+server.start(handlerMap);
+
+
+/**
+ * Notes
+ * 
+ * Startup Tasks
+ *  - When app starts up, need to get auths for the calendars we're tracking.
+ *  --- Get a list of calendars for each user
+ *  ------ Initialize the Server and setup routes (Each route should be assigned a handler)
+ * 
+ * 
+ * Pages:
+ * index - Lists available calendars
+ * /list/{calendarId} - Lists the events within a given calendar
+ * /listall - List all events for all known calendars
+ * /event/{eventId} - Lists details for a given event
+ * 
+ * 
+ * Calendar Functions Needed
+ * 1. Get Calendars - gets all calendars for the user
+ * 2. List Events by Calendar - lists all events on a calendar
+ * 3. List All Events - lists all events for all calendars
+ * 4. Get Event - Gets a single event 
+ * 
+ * 
+ * index --> Init Calendar
+ *       --> Start Server
+ * 
+ * Server --> Accept requests - route to appropriate request handler
+ * 
+ * Calendar -->  All calendar functions
+ * 
+ * Request Handler --> Handle Request - i.e. Pull info from Calendar
+ * 
+ */

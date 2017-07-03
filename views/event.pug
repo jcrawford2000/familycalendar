@@ -1,0 +1,13 @@
+html
+    head
+        title #{title}
+    body
+        h1 #{message}
+        p Summary: #{event.summary}
+        p Description: #{event.description}
+        p Location: #{event.location}
+        p Start: #{event.start.dateTime}
+        p End: #{event.end.dateTime}
+        a(href=event.htmlLink)= 'View on Google'
+        
+        

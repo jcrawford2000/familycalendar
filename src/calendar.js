@@ -30,33 +30,36 @@ const path = require('path');
  * Constants
  */ 
 const SCOPES = ['https://www.googleapis.com/auth/calendar.readonly'];
-const TOKEN_PATH = path.resolve(__dirname, 'calendar-nodejs-quickstart.json');
-const CLIENT_SECRET_PATH = path.resolve(__dirname, 'client_secret.json');
+const TOKEN_PATH = path.resolve(__dirname, '../etc/calendar-token.json');
+const CLIENT_SECRET_PATH = path.resolve(__dirname, '../etc/client_secret.json');
 const CALLIST_DIR = path.resolve(__dirname, 'calendar_list.json');
 const logger = log4js.getLogger('calendar');
 
 /** 
  * Initialize Calendar and authorize with Google OAuth2
- * @param {function} callback The callback to call when initialization is completed.
+ * Saves Auth Token
  */
-function init(callback){
-    logger.info("Calendar Initializing");
-    // Load client secrets from a local file.
-    logger.info("Loading Client Secret from " + CLIENT_SECRET_PATH);
-    fs.readFile(CLIENT_SECRET_PATH, function processClientSecrets(err, content) {
-        if (err) {
-            logger.error("Error loading client secret file" + err);
-            return;
-        }
-        // Authorize a client with the loaded credentials, then call the
-        // Google Calendar API.
-        logger.info("Authorizing with Google.");
-        authorize(JSON.parse(content), function (auth) { 
-            //Set Auth Token
-            gauth = auth; 
-            logger.debug("Authorized with Google"); 
-            callback();});
+function init() {
+  logger.info("Calendar Initializing");
+  // Load client secrets from a local file.
+  logger.info("Loading Client Secret from " + CLIENT_SECRET_PATH);
+  fs.readFile(CLIENT_SECRET_PATH, function processClientSecrets(err, content) 
+  {
+    if (err) 
+    {
+      logger.error("Error loading client secret file" + err);
+      return;
+    }
+    // Authorize a client with the loaded credentials, then call the
+    // Google Calendar API.
+    logger.info("Authorizing with Google.");
+    authorize(JSON.parse(content), function (auth) 
+    { 
+      //Set Auth Token
+      gauth = auth; 
+      logger.debug("Authorized with Google"); 
     });
+  });
 }
 
 /**
@@ -139,52 +142,33 @@ function storeToken(token) {
 }
 
 /**
- * Store Calendar List to disk to be used later
- * 
- */
-function storeCalendarList(calList)
-{
-  logger.info("Saving Calendar List");
-  try {
-    fs.mkdirSync(CALLIST_DIR);
-  } catch (err)
-  {
-    if (err.code != 'EEXIST')
-    {
-      throw err;
-    }
-  }
-  fs.writeFile(CALLLIST_PATH, JSON.stringify(callist));
-  logger.info("Calendar List stored to " + CALLLIST_PATH);
-}
-
-/**
  * Retreive list of calendars for the user
  */
-function getCalendarList()
+function getCalendarList(callback)
 {
-    logger.info("Getting Calendar List");
-    var gcalendar = google.calendar('v3');
-    var calendars = [];
-    var cal;
-    gcalendar.calendarList.list({auth: gauth}, function(err, response){
-                      if (err) {
-                          logger.fatal("Error retrieving Calendars List", err);
-                          return;
-                      }
-                      //logger.debug("Response:\n" + JSON.stringify(response));
-                      var list = response.items;
-                      logger.debug("List contains " + list.length + " calendars");
-                      for (var i=0; i < list.length; i++)
-                      {
-                          cal = new Object();
-                          cal.id = list[i].id;
-                          cal.name = list[i].summary;
-                          logger.debug("Adding Calendar with ID:" + cal.id + " and Name:" + cal.name + " to Calendars Collection");
-                          calendars.push(cal);
-                      }
-                      logger.debug("Calendars Collection:\n" + JSON.stringify(calendars,null,2));
-                  });
+  logger.info("Getting Calendar List");
+  var gcalendar = google.calendar('v3');
+  var calendars = [];
+  var cal;
+  gcalendar.calendarList.list({auth: gauth}, function(err, response){
+    if (err) 
+    {
+      logger.fatal("Error retrieving Calendars List", err);
+      return;
+    }
+    var list = response.items;
+    logger.debug("List contains " + list.length + " calendars");
+    for (var i=0; i < list.length; i++)
+    {
+      cal = new Object();
+      cal.id = list[i].id;
+      cal.name = list[i].summary;
+      logger.debug("Adding Calendar with ID:" + cal.id + " and Name:" + cal.name + " to Calendars Collection");
+      calendars.push(cal);
+    }
+    logger.debug("Calendars Collection:\n" + JSON.stringify(calendars,null,2));
+    callback(calendars);
+  });
 }
 
 /**
@@ -192,13 +176,13 @@ function getCalendarList()
  *
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
-function listEvents(auth, calendarId) {
+function listEvents(calendarId, callback) {
   logger.info("Retreiving list of events from Calendar.");
   var calendar = google.calendar('v3');
   calendar.events.list({
-    auth: auth,
+    auth: gauth,
     calendarId: calendarId,
-    timeMin: (new Date()).toISOString(),
+    
     maxResults: 10,
     singleEvents: true,
     orderBy: 'startTime'
@@ -208,17 +192,24 @@ function listEvents(auth, calendarId) {
       return;
     }
     var events = response.items;
-    logger.info("Calendar contains " + events.length + " events.");
-    if (events.length == 0) {
-      logger.info('No upcoming events found.');
-    } else {
-      logger.info('Listing Upcoming 10 events:');
-      for (var i = 0; i < events.length; i++) {
-        var event = events[i];
-        var start = event.start.dateTime || event.start.date;
-        logger.info('Event %d:\n\tStart Date: %s \n\tSummary: %s', i+1, start, event.summary);
-      }
+    callback(events);
+  });
+}
+
+function getEvent(calendarid, eventId, callback) {
+  logger.info("Getting event");
+  var calendar = google.calendar('v3');
+  calendar.events.get({
+    auth: gauth,
+    calendarId: calendarid,
+    eventId: eventId
+  }, function(err, response){
+    if (err) {
+      logger.error("Error getting Event for Calendar ID:" + calendarid + " and Event ID:" + eventId, err);
+      return;
     }
+    logger.debug("Returning event\n" + JSON.stringify(response,null,2));
+    callback(response);
   });
 }
 
@@ -227,3 +218,5 @@ function listEvents(auth, calendarId) {
  */
 exports.init = init;
 exports.getCalendarList = getCalendarList;
+exports.listEvents = listEvents;
+exports.getEvent = getEvent;
